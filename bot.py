@@ -57,8 +57,10 @@ async def on_ready():
     if client.guilds:
         guild = client.guilds[0]
         channels = [{"id": str(c.id), "name": c.name} for c in guild.channels if str(c.type) == "text"]
-        voice_channels = [{"id": str(vc.id), "name": vc.name, "members": [str(m.id) for m in vc.members if not m.bot]} for vc in guild.voice_channels]
-        members = [{"id": str(m.id), "name": m.display_name, "status": str(m.status), "avatar": m.display_avatar.url if m.display_avatar else ""} for m in guild.members if not m.bot]
+        
+        # 修正：ボイスチャンネル参加者とメンバー一覧から Bot を除外する処理（if not m.bot）を削除
+        voice_channels = [{"id": str(vc.id), "name": vc.name, "members": [str(m.id) for m in vc.members]} for vc in guild.voice_channels]
+        members = [{"id": str(m.id), "name": m.display_name, "status": str(m.status), "avatar": m.display_avatar.url if m.display_avatar else ""} for m in guild.members]
         
         send_to_web("init", {
             "guild_name": guild.name,
@@ -69,9 +71,6 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    # 修正：Botのメッセージを除外する処理（if message.author.bot: return）を削除しました。
-    # これにより、Bot自身が送信したメッセージや、他のBotのメッセージもWeb画面に表示されるようになります。
-    
     print(f'[メッセージ] #{message.channel.name} | {message.author}: {message.content}', flush=True)
     
     attachments = []
@@ -89,9 +88,7 @@ async def on_message(message):
 
 @client.event
 async def on_presence_update(before, after):
-    if after.bot:
-        return
-        
+    # 修正：オンライン状態の監視から Bot を除外する処理（if after.bot: return）を削除
     old_status = str(before.status) if before else 'offline'
     new_status = str(after.status)
 
@@ -104,9 +101,7 @@ async def on_presence_update(before, after):
 
 @client.event
 async def on_voice_state_update(member, before, after):
-    if member.bot:
-        return
-
+    # 修正：ボイスチャンネルの監視から Bot を除外する処理（if member.bot: return）を削除
     old_channel = before.channel
     new_channel = after.channel
     
