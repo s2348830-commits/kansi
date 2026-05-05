@@ -26,6 +26,12 @@
                 <h3 id="current-channel-name"># チャンネルを選択してください</h3>
             </div>
             <div class="messages" id="messages-list"></div>
+            
+            <!-- 追加：メッセージ入力エリア -->
+            <div class="chat-input-wrapper">
+                <input type="text" id="message-input" placeholder="チャンネルを選択してください..." autocomplete="off" disabled>
+                <button id="send-btn" disabled>送信</button>
+            </div>
         </div>
 
         <!-- 右側：メンバー一覧 -->
@@ -43,12 +49,16 @@
         let currentChannelId = null;
         let localCache = { messages: {}, voice_channels: [] };
 
+        // 入力フォームの要素を取得
+        const msgInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+
         socket.on('init_state', (data) => {
             document.getElementById('server-name').innerText = data.guild_name;
             localCache = data;
             
             renderChannels();
-            renderVoiceChannels(); // 追加
+            renderVoiceChannels();
             renderMembers();
             
             if (data.channels.length > 0 && !currentChannelId) {
@@ -75,7 +85,6 @@
             }
         });
 
-        // 追加：通話状況の更新を受信
         socket.on('voice_update', (data) => {
             const { member_id, old_channel_id, new_channel_id } = data;
             if (old_channel_id) {
@@ -86,7 +95,7 @@
                 const newVc = localCache.voice_channels.find(vc => vc.id === new_channel_id);
                 if (newVc && !newVc.members.includes(member_id)) newVc.members.push(member_id);
             }
-            renderVoiceChannels(); // 画面を更新
+            renderVoiceChannels();
         });
 
         function renderChannels() {
@@ -101,21 +110,18 @@
             });
         }
 
-        // 追加：ボイスチャンネルと参加メンバーを描画
         function renderVoiceChannels() {
             const list = document.getElementById('voice-channels-list');
             list.innerHTML = '';
             (localCache.voice_channels || []).forEach(vc => {
                 const container = document.createElement('div');
                 
-                // チャンネル名
                 const title = document.createElement('div');
                 title.className = 'channel-item';
                 title.style.cursor = 'default';
                 title.innerText = `🔊 ${vc.name}`;
                 container.appendChild(title);
 
-                // 参加中のメンバー
                 if (vc.members && vc.members.length > 0) {
                     const membersDiv = document.createElement('div');
                     membersDiv.className = 'voice-members-list';
@@ -181,6 +187,12 @@
             
             const messages = localCache.messages[id] || [];
             messages.forEach(msg => appendMessage(msg));
+
+            // 追加：チャンネルが選択されたら入力フォームを有効化する
+            msgInput.disabled = false;
+            sendBtn.disabled = false;
+            msgInput.placeholder = `# ${name} へメッセージを送信...`;
+            msgInput.focus();
         }
 
         function appendMessage(msg) {
@@ -213,6 +225,30 @@
                 list.scrollTop = list.scrollHeight;
             }, 100);
         }
+
+        // 追加：メッセージ送信の処理
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (text && currentChannelId) {
+                // サーバー(Node.js)に送信イベントを発火
+                socket.emit('send_message', {
+                    channel_id: currentChannelId,
+                    content: text
+                });
+                // 送信後は入力欄を空にする
+                msgInput.value = '';
+            }
+        }
+
+        // ボタンクリックで送信
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Enterキーで送信
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
     </script>
 </body>
 </html>

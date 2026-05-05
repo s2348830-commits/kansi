@@ -2,6 +2,7 @@ import discord
 import os
 import json
 import sys
+import asyncio
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -10,6 +11,7 @@ intents.members = True
 intents.voice_states = True
 
 client = discord.Client(intents=intents)
+stdin_task_started = False
 
 # Node.jsサーバーにデータをJSON形式で送信する関数
 def send_to_web(event_type, data):
@@ -18,25 +20,50 @@ def send_to_web(event_type, data):
     except Exception as e:
         pass
 
+# Node.jsサーバーからの送信リクエストを受け取るループ処理
+async def read_from_node():
+    loop = asyncio.get_running_loop()
+    while True:
+        try:
+            # 標準入力(stdin)から送られてくる1行を非同期で読み取る
+            line = await loop.run_in_executor(None, sys.stdin.readline)
+            if not line:
+                break
+            
+            payload = json.loads(line)
+            if payload.get("type") == "send_message":
+                data = payload.get("data", {})
+                channel_id = data.get("channel_id")
+                content = data.get("content")
+                
+                # 指定されたチャンネルへメッセージを送信
+                if channel_id and content:
+                    channel = client.get_channel(int(channel_id))
+                    if channel:
+                        await channel.send(content)
+        except Exception as e:
+            pass
+
 @client.event
 async def on_ready():
+    global stdin_task_started
     print(f'Botが起動しました: {client.user}', flush=True)
+    
+    # Node.jsからの入力を受け取るタスクをバックグラウンドで開始
+    if not stdin_task_started:
+        asyncio.create_task(read_from_node())
+        stdin_task_started = True
     
     if client.guilds:
         guild = client.guilds[0]
-        # テキストチャンネルの取得
         channels = [{"id": str(c.id), "name": c.name} for c in guild.channels if str(c.type) == "text"]
-        
-        # ボイスチャンネルと現在入っているメンバーの取得
         voice_channels = [{"id": str(vc.id), "name": vc.name, "members": [str(m.id) for m in vc.members if not m.bot]} for vc in guild.voice_channels]
-        
-        # メンバー情報の取得
         members = [{"id": str(m.id), "name": m.display_name, "status": str(m.status), "avatar": m.display_avatar.url if m.display_avatar else ""} for m in guild.members if not m.bot]
         
         send_to_web("init", {
             "guild_name": guild.name,
             "channels": channels,
-            "voice_channels": voice_channels, # 追加
+            "voice_channels": voice_channels,
             "members": members
         })
 
@@ -83,7 +110,6 @@ async def on_voice_state_update(member, before, after):
     old_channel = before.channel
     new_channel = after.channel
     
-    # コンソール用ログ
     if old_channel is None and new_channel is not None:
         print(f'[通話] {member} が 🔊{new_channel.name} に参加しました。', flush=True)
     elif old_channel is not None and new_channel is None:
@@ -91,7 +117,6 @@ async def on_voice_state_update(member, before, after):
     elif old_channel is not None and new_channel is not None and old_channel.id != new_channel.id:
         print(f'[通話] {member} が 🔊{old_channel.name} から 🔊{new_channel.name} に移動しました。', flush=True)
 
-    # Web画面用：ボイスチャンネルの入退室データを送信
     send_to_web("voice_update", {
         "member_id": str(member.id),
         "old_channel_id": str(old_channel.id) if old_channel else None,

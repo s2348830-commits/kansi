@@ -1,12 +1,11 @@
-/* 画像から抽出した最新のDiscordカラー設定 */
 :root {
-    --bg-chat: #313338;       /* チャットエリアの背景色 */
-    --bg-sidebar: #2b2d31;    /* サイドバーの背景色 */
-    --bg-hover: #35373c;      /* ホバー時の背景色 */
-    --text-normal: #dbdee1;   /* 通常の文字色 */
-    --text-muted: #949ba4;    /* チャンネル名などの少し暗い文字色 */
-    --text-header: #f2f3f5;   /* ヘッダーや選択中チャンネルの明るい文字色 */
-    --border-color: #1e1f22;  /* 境界線の色 */
+    --bg-chat: #313338;
+    --bg-sidebar: #2b2d31;
+    --bg-hover: #35373c;
+    --text-normal: #dbdee1;
+    --text-muted: #949ba4;
+    --text-header: #f2f3f5;
+    --border-color: #1e1f22;
 }
 
 *, *::before, *::after {
@@ -21,7 +20,7 @@ body {
     color: var(--text-normal);
     height: 100vh;
     display: flex;
-    overflow: hidden; /* body自体のスクロールは防ぐ */
+    overflow: hidden;
 }
 
 .container {
@@ -30,9 +29,6 @@ body {
     height: 100%;
 }
 
-/* =========================================
-   サイドバー共通（チャンネル・メンバー）
-========================================= */
 .sidebar {
     background-color: var(--bg-sidebar);
     width: 240px;
@@ -55,7 +51,6 @@ body {
     overflow-y: auto;
 }
 
-/* 画像に合わせた見出しデザイン */
 #server-name {
     font-size: 15px;
     color: var(--text-header);
@@ -76,7 +71,6 @@ h3 {
     padding-left: 5px;
 }
 
-/* チャンネル一覧 */
 .channel-item {
     padding: 6px 10px;
     margin-bottom: 2px;
@@ -92,9 +86,6 @@ h3 {
     color: var(--text-normal);
 }
 
-/* =========================================
-   チャットエリア
-========================================= */
 .chat-area {
     flex: 1;
     min-width: 300px;
@@ -146,9 +137,52 @@ h3 {
     word-break: break-word;
 }
 
-/* =========================================
-   メンバー一覧＆アイコン類
-========================================= */
+/* --- 追加：メッセージ入力エリアのスタイル --- */
+.chat-input-wrapper {
+    padding: 0 20px 20px 20px;
+    flex-shrink: 0;
+    display: flex;
+    gap: 10px;
+}
+
+#message-input {
+    flex: 1;
+    background-color: #383a40; /* Discord純正の入力欄カラー */
+    color: var(--text-normal);
+    border: none;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+}
+
+#message-input:disabled {
+    background-color: var(--bg-sidebar);
+    cursor: not-allowed;
+}
+
+#send-btn {
+    background-color: #5865f2; /* Discord純正の青色ボタン */
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#send-btn:hover:not(:disabled) {
+    background-color: #4752c4;
+}
+
+#send-btn:disabled {
+    background-color: #3a404e;
+    color: #72767d;
+    cursor: not-allowed;
+}
+
 .member-item {
     display: flex;
     align-items: center;
@@ -186,7 +220,6 @@ h3 {
     border: 2px solid var(--bg-sidebar);
 }
 
-/* 添付画像 */
 .message-attachments {
     margin-top: 8px;
     display: flex;
@@ -202,7 +235,6 @@ h3 {
     align-self: flex-start;
 }
 
-/* ボイスチャンネルの参加者 */
 .voice-members-list {
     padding-left: 20px;
     margin-bottom: 8px;
@@ -233,27 +265,21 @@ h3 {
     object-fit: cover;
 }
 
-
-/* =========================================
-   スマホ・タブレット用：アプリ風スワイプレイアウト
-========================================= */
 @media screen and (max-width: 768px) {
-    /* 縦積みをやめ、横スクロールで3カラムを移動できるようにする */
     .container {
         flex-direction: row;
         overflow-x: auto;
-        /* スワイプ時に各パネルにピタッと止まるようにする */
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: none; /* Firefoxスクロールバー非表示 */
+        scrollbar-width: none; 
     }
     
     .container::-webkit-scrollbar {
-        display: none; /* Chrome/Safariスクロールバー非表示 */
+        display: none; 
     }
 
     .sidebar {
-        width: 280px; /* スマホで操作しやすい太さに */
+        width: 280px; 
         flex-shrink: 0;
         scroll-snap-align: start;
         border-right: 1px solid var(--border-color);
@@ -261,10 +287,10 @@ h3 {
     }
 
     .chat-area {
-        width: 100vw; /* スマホ画面ではチャットエリアが全画面幅になる */
+        width: 100vw; 
         flex: none;
         flex-shrink: 0;
-        scroll-snap-align: center; /* 中央にピタッと止まる */
+        scroll-snap-align: center; 
     }
 
     .members-sidebar {
@@ -277,5 +303,10 @@ h3 {
 
     .message-attachment {
         max-height: 220px;
+    }
+    
+    /* スマホ画面の入力欄余白調整 */
+    .chat-input-wrapper {
+        padding: 0 10px 15px 10px;
     }
 }
