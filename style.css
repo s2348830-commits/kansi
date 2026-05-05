@@ -1,3 +1,8 @@
+/* 全要素のサイズ計算を直感的にする設定（スマホでの横揺れ防止） */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -72,6 +77,7 @@ h3 {
     display: flex;
     align-items: center;
     padding: 0 20px;
+    flex-shrink: 0; /* スマホでヘッダーが潰れないように設定 */
 }
 
 .chat-header h3 {
@@ -122,6 +128,7 @@ h3 {
     position: relative;
     width: 32px;
     height: 32px;
+    flex-shrink: 0;
 }
 
 .avatar {
@@ -156,9 +163,9 @@ h3 {
     align-self: flex-start;
 }
 
-/* --- 追加：ボイスチャンネルの参加者用スタイル --- */
+/* ボイスチャンネルの参加者用スタイル */
 .voice-members-list {
-    padding-left: 20px; /* ボイスチャンネル名より一段右に下げる */
+    padding-left: 20px;
     margin-bottom: 8px;
     display: flex;
     flex-direction: column;
@@ -185,4 +192,42 @@ h3 {
     height: 24px;
     border-radius: 50%;
     object-fit: cover;
+}
+
+
+/* =========================================
+   スマホ・タブレット用レスポンシブデザイン
+   （画面幅が768px以下の場合に適用）
+========================================= */
+@media screen and (max-width: 768px) {
+    .container {
+        /* 横並びから縦積みに変更 */
+        flex-direction: column; 
+    }
+
+    .sidebar {
+        width: 100%; /* サイドバーを画面幅いっぱいに */
+        padding: 10px 15px; /* スマホでタップしやすいように余白を確保 */
+    }
+
+    .channels-sidebar {
+        height: 25vh; /* 画面全体の25%の高さにしてスクロールさせる */
+        border-right: none;
+        border-bottom: 1px solid #202225;
+    }
+
+    .chat-area {
+        flex: 1; /* 残りの高さをすべてチャットエリアに割り当て */
+        height: 50vh;
+    }
+
+    .members-sidebar {
+        height: 25vh; /* 画面全体の25%の高さ */
+        border-top: 1px solid #202225;
+    }
+
+    /* スマホ画面だと画像が大きすぎる場合があるので制限 */
+    .message-attachment {
+        max-height: 200px;
+    }
 }
