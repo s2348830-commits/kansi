@@ -1,0 +1,142 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #36393f;
+    color: #dcddde;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* 左側・右側のサイドバー共通設定 */
+.sidebar {
+    background-color: #2f3136;
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.channels-sidebar {
+    border-right: 1px solid #202225;
+}
+
+.members-sidebar {
+    background-color: #2f3136;
+    overflow-y: auto;
+}
+
+h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #8e9297;
+    margin-bottom: 10px;
+}
+
+/* チャンネル一覧のアイテム */
+.channel-item {
+    padding: 8px 10px;
+    margin-bottom: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #8e9297;
+    font-weight: bold;
+}
+
+.channel-item:hover {
+    background-color: #393c43;
+    color: #dcddde;
+}
+
+/* 中央のチャットエリア */
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #36393f;
+}
+
+.chat-header {
+    height: 48px;
+    border-bottom: 1px solid #202225;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.chat-header h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 16px;
+    text-transform: none;
+}
+
+.messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* メッセージのアイテム */
+.message-item {
+    display: flex;
+    gap: 15px;
+}
+
+.message-author {
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.message-content {
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* メンバー一覧のアイテムとアバター */
+.member-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 5px;
+    border-radius: 4px;
+}
+
+.member-item:hover {
+    background-color: #393c43;
+}
+
+.avatar-container {
+    position: relative;
+    width: 32px;
+    height: 32px;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* オンライン・オフラインの緑/灰色の丸ポチ */
+.status-indicator {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #2f3136;
+}
