@@ -11,7 +11,13 @@
         <!-- 左側：チャンネル一覧 -->
         <div class="sidebar channels-sidebar">
             <h3 id="server-name">サーバー名</h3>
-            <div id="channels-list"></div>
+            <div class="scroll-area">
+                <h3>テキストチャンネル</h3>
+                <div id="channels-list"></div>
+                
+                <h3 style="margin-top: 20px;">ボイスチャンネル</h3>
+                <div id="voice-channels-list"></div>
+            </div>
         </div>
 
         <!-- 中央：チャットエリア -->
@@ -19,9 +25,7 @@
             <div class="chat-header">
                 <h3 id="current-channel-name"># チャンネルを選択してください</h3>
             </div>
-            <div class="messages" id="messages-list">
-                <!-- メッセージがここに追加されます -->
-            </div>
+            <div class="messages" id="messages-list"></div>
         </div>
 
         <!-- 右側：メンバー一覧 -->
@@ -33,18 +37,18 @@
         </div>
     </div>
 
-    <!-- Socket.ioのクライアント用スクリプト -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         let currentChannelId = null;
-        let localCache = { messages: {} };
+        let localCache = { messages: {}, voice_channels: [] };
 
         socket.on('init_state', (data) => {
             document.getElementById('server-name').innerText = data.guild_name;
             localCache = data;
             
             renderChannels();
+            renderVoiceChannels(); // 追加
             renderMembers();
             
             if (data.channels.length > 0 && !currentChannelId) {
@@ -71,6 +75,20 @@
             }
         });
 
+        // 追加：通話状況の更新を受信
+        socket.on('voice_update', (data) => {
+            const { member_id, old_channel_id, new_channel_id } = data;
+            if (old_channel_id) {
+                const oldVc = localCache.voice_channels.find(vc => vc.id === old_channel_id);
+                if (oldVc) oldVc.members = oldVc.members.filter(id => id !== member_id);
+            }
+            if (new_channel_id) {
+                const newVc = localCache.voice_channels.find(vc => vc.id === new_channel_id);
+                if (newVc && !newVc.members.includes(member_id)) newVc.members.push(member_id);
+            }
+            renderVoiceChannels(); // 画面を更新
+        });
+
         function renderChannels() {
             const list = document.getElementById('channels-list');
             list.innerHTML = '';
@@ -80,6 +98,44 @@
                 div.innerText = `# ${ch.name}`;
                 div.onclick = () => selectChannel(ch.id, ch.name);
                 list.appendChild(div);
+            });
+        }
+
+        // 追加：ボイスチャンネルと参加メンバーを描画
+        function renderVoiceChannels() {
+            const list = document.getElementById('voice-channels-list');
+            list.innerHTML = '';
+            (localCache.voice_channels || []).forEach(vc => {
+                const container = document.createElement('div');
+                
+                // チャンネル名
+                const title = document.createElement('div');
+                title.className = 'channel-item';
+                title.style.cursor = 'default';
+                title.innerText = `🔊 ${vc.name}`;
+                container.appendChild(title);
+
+                // 参加中のメンバー
+                if (vc.members && vc.members.length > 0) {
+                    const membersDiv = document.createElement('div');
+                    membersDiv.className = 'voice-members-list';
+                    
+                    vc.members.forEach(memberId => {
+                        const member = localCache.members.find(m => m.id === memberId);
+                        if (member) {
+                            const mDiv = document.createElement('div');
+                            mDiv.className = 'voice-member-item';
+                            const avatarUrl = member.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
+                            mDiv.innerHTML = `
+                                <img src="${avatarUrl}" class="voice-avatar">
+                                <span>${member.name}</span>
+                            `;
+                            membersDiv.appendChild(mDiv);
+                        }
+                    });
+                    container.appendChild(membersDiv);
+                }
+                list.appendChild(container);
             });
         }
 
@@ -127,18 +183,14 @@
             messages.forEach(msg => appendMessage(msg));
         }
 
-        // メッセージと画像を描画する処理
         function appendMessage(msg) {
             const list = document.getElementById('messages-list');
             const div = document.createElement('div');
             div.className = 'message-item';
             
             const avatarUrl = msg.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
-            
-            // 画像のみ送られてテキストが無い場合にも対応
             const content = (msg.content || '').replace(/\n/g, '<br>');
 
-            // 添付画像のHTMLタグを生成
             let attachmentsHtml = '';
             if (msg.attachments && msg.attachments.length > 0) {
                 attachmentsHtml = '<div class="message-attachments">';
@@ -157,7 +209,6 @@
                 </div>
             `;
             list.appendChild(div);
-            // 一番下にスクロール（画像読み込み後にもスクロールできるように少し遅延）
             setTimeout(() => {
                 list.scrollTop = list.scrollHeight;
             }, 100);

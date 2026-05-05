@@ -9,28 +9,24 @@ const io = new Server(server);
 
 const port = process.env.PORT || 3000;
 
-// index.htmlやstyle.cssなどの静的ファイルを配信する
 app.use(express.static(__dirname));
 
-// サーバー内で保持しておく最新のDiscord状態
 let cache = {
     guild_name: "Loading...",
     channels: [],
+    voice_channels: [], // 追加
     members: [],
-    messages: {} // チャンネルIDをキーにしてメッセージ配列を保存
+    messages: {} 
 };
 
-// Webブラウザがアクセスしてきた時の処理
 io.on('connection', (socket) => {
     console.log('Web画面が開かれました。');
-    // 開いた瞬間に、現在保持しているサーバーの情報を送る
     socket.emit('init_state', cache);
 });
 
 server.listen(port, () => {
     console.log(`Webサーバーがポート ${port} で起動しました。`);
     
-    // Pythonボットの起動
     const bot = spawn('python3', ['bot.py']);
 
     bot.stdout.on('data', (data) => {
@@ -39,11 +35,9 @@ server.listen(port, () => {
             if (!line.trim()) continue;
             
             try {
-                // Pythonから送られたJSONデータを解析
                 const payload = JSON.parse(line);
                 handleBotEvent(payload);
             } catch (e) {
-                // JSON以外の普通のprint出力（ログなど）はそのままコンソールへ
                 console.log(line);
             }
         }
@@ -54,11 +48,11 @@ server.listen(port, () => {
     });
 });
 
-// Pythonから受け取ったデータをWeb画面に中継する関数
 function handleBotEvent({ event, data }) {
     if (event === 'init') {
         cache.guild_name = data.guild_name;
         cache.channels = data.channels;
+        cache.voice_channels = data.voice_channels || []; // 追加
         cache.members = data.members;
         io.emit('init_state', cache);
     } 
@@ -67,7 +61,6 @@ function handleBotEvent({ event, data }) {
             cache.messages[data.channel_id] = [];
         }
         cache.messages[data.channel_id].push(data);
-        // メッセージ履歴が長くなりすぎないよう直近100件に制限
         if (cache.messages[data.channel_id].length > 100) {
             cache.messages[data.channel_id].shift();
         }
@@ -79,5 +72,26 @@ function handleBotEvent({ event, data }) {
             member.status = data.status;
         }
         io.emit('presence_update', data);
+    }
+    // 追加：通話の入退室イベントを処理
+    else if (event === 'voice_update') {
+        const { member_id, old_channel_id, new_channel_id } = data;
+        
+        // 前のチャンネルからメンバーを削除
+        if (old_channel_id) {
+            const oldVc = cache.voice_channels.find(vc => vc.id === old_channel_id);
+            if (oldVc) {
+                oldVc.members = oldVc.members.filter(id => id !== member_id);
+            }
+        }
+        // 新しいチャンネルにメンバーを追加
+        if (new_channel_id) {
+            const newVc = cache.voice_channels.find(vc => vc.id === new_channel_id);
+            if (newVc && !newVc.members.includes(member_id)) {
+                newVc.members.push(member_id);
+            }
+        }
+        // ブラウザに更新を通知
+        io.emit('voice_update', data);
     }
 }

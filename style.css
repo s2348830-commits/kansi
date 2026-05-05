@@ -15,7 +15,6 @@ body {
     height: 100%;
 }
 
-/* 左側・右側のサイドバー共通設定 */
 .sidebar {
     background-color: #2f3136;
     width: 240px;
@@ -33,6 +32,12 @@ body {
     overflow-y: auto;
 }
 
+/* チャンネル一覧が多い時のスクロール設定 */
+.scroll-area {
+    flex: 1;
+    overflow-y: auto;
+}
+
 h3 {
     font-size: 12px;
     text-transform: uppercase;
@@ -40,7 +45,6 @@ h3 {
     margin-bottom: 10px;
 }
 
-/* チャンネル一覧のアイテム */
 .channel-item {
     padding: 8px 10px;
     margin-bottom: 2px;
@@ -55,7 +59,6 @@ h3 {
     color: #dcddde;
 }
 
-/* 中央のチャットエリア */
 .chat-area {
     flex: 1;
     display: flex;
@@ -87,7 +90,6 @@ h3 {
     gap: 15px;
 }
 
-/* メッセージのアイテム */
 .message-item {
     display: flex;
     gap: 15px;
@@ -104,7 +106,6 @@ h3 {
     word-break: break-word;
 }
 
-/* メンバー一覧のアイテムとアバター */
 .member-item {
     display: flex;
     align-items: center;
@@ -130,7 +131,6 @@ h3 {
     object-fit: cover;
 }
 
-/* オンライン・オフラインの緑/灰色の丸ポチ */
 .status-indicator {
     position: absolute;
     bottom: -2px;
@@ -141,7 +141,6 @@ h3 {
     border: 2px solid #2f3136;
 }
 
-/* --- 追加：添付画像のスタイル --- */
 .message-attachments {
     margin-top: 8px;
     display: flex;
@@ -153,6 +152,37 @@ h3 {
     max-width: 100%;
     max-height: 350px;
     border-radius: 8px;
-    object-fit: contain; /* アスペクト比を維持して縮小 */
+    object-fit: contain;
     align-self: flex-start;
+}
+
+/* --- 追加：ボイスチャンネルの参加者用スタイル --- */
+.voice-members-list {
+    padding-left: 20px; /* ボイスチャンネル名より一段右に下げる */
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.voice-member-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    color: #8e9297;
+    font-size: 14px;
+}
+
+.voice-member-item:hover {
+    background-color: #393c43;
+    color: #dcddde;
+}
+
+.voice-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
 }
