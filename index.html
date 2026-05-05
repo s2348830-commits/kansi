@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <!-- 右側（画像の構成に準拠）：メンバー一覧 -->
+        <!-- 右側：メンバー一覧 -->
         <div class="sidebar members-sidebar">
             <h3>オンライン</h3>
             <div id="members-online"></div>
@@ -40,7 +40,6 @@
         let currentChannelId = null;
         let localCache = { messages: {} };
 
-        // サーバーから初期データを受け取る
         socket.on('init_state', (data) => {
             document.getElementById('server-name').innerText = data.guild_name;
             localCache = data;
@@ -48,35 +47,30 @@
             renderChannels();
             renderMembers();
             
-            // 最初は一番上のチャンネルを選択状態にする
             if (data.channels.length > 0 && !currentChannelId) {
                 selectChannel(data.channels[0].id, data.channels[0].name);
             }
         });
 
-        // サーバーから新しいメッセージを受け取る
         socket.on('new_message', (msg) => {
             if (!localCache.messages[msg.channel_id]) {
                 localCache.messages[msg.channel_id] = [];
             }
             localCache.messages[msg.channel_id].push(msg);
             
-            // 開いているチャンネルのメッセージなら画面に追加
             if (msg.channel_id === currentChannelId) {
                 appendMessage(msg);
             }
         });
 
-        // サーバーからステータス変更を受け取る
         socket.on('presence_update', (data) => {
             const member = localCache.members.find(m => m.id === data.id);
             if (member) {
                 member.status = data.status;
-                renderMembers(); // メンバー一覧を再描画
+                renderMembers();
             }
         });
 
-        // チャンネル一覧を描画する
         function renderChannels() {
             const list = document.getElementById('channels-list');
             list.innerHTML = '';
@@ -89,7 +83,6 @@
             });
         }
 
-        // メンバー一覧をオンライン/オフラインに分けて描画する
         function renderMembers() {
             const onlineList = document.getElementById('members-online');
             const offlineList = document.getElementById('members-offline');
@@ -100,11 +93,8 @@
                 const div = document.createElement('div');
                 div.className = 'member-item';
                 
-                // アバター画像（無ければデフォルトアイコン）
                 const avatarUrl = member.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
-                
-                // ステータスに応じたインジケーターの色
-                let statusColor = '#747f8d'; // offline
+                let statusColor = '#747f8d';
                 if (member.status === 'online') statusColor = '#43b581';
                 if (member.status === 'idle') statusColor = '#faa61a';
                 if (member.status === 'dnd') statusColor = '#f04747';
@@ -126,7 +116,6 @@
             });
         }
 
-        // チャンネルを選択したときの処理
         function selectChannel(id, name) {
             currentChannelId = id;
             document.getElementById('current-channel-name').innerText = `# ${name}`;
@@ -138,7 +127,7 @@
             messages.forEach(msg => appendMessage(msg));
         }
 
-        // メッセージを画面に追加する
+        // メッセージと画像を描画する処理
         function appendMessage(msg) {
             const list = document.getElementById('messages-list');
             const div = document.createElement('div');
@@ -146,19 +135,32 @@
             
             const avatarUrl = msg.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
             
-            // 簡易的なテキスト表示（改行対応）
-            const content = msg.content.replace(/\n/g, '<br>');
+            // 画像のみ送られてテキストが無い場合にも対応
+            const content = (msg.content || '').replace(/\n/g, '<br>');
+
+            // 添付画像のHTMLタグを生成
+            let attachmentsHtml = '';
+            if (msg.attachments && msg.attachments.length > 0) {
+                attachmentsHtml = '<div class="message-attachments">';
+                msg.attachments.forEach(url => {
+                    attachmentsHtml += `<img src="${url}" class="message-attachment" alt="添付画像">`;
+                });
+                attachmentsHtml += '</div>';
+            }
 
             div.innerHTML = `
                 <img src="${avatarUrl}" class="avatar">
-                <div>
+                <div style="flex: 1;">
                     <div class="message-author">${msg.author}</div>
                     <div class="message-content">${content}</div>
+                    ${attachmentsHtml}
                 </div>
             `;
             list.appendChild(div);
-            // 一番下にスクロール
-            list.scrollTop = list.scrollHeight;
+            // 一番下にスクロール（画像読み込み後にもスクロールできるように少し遅延）
+            setTimeout(() => {
+                list.scrollTop = list.scrollHeight;
+            }, 100);
         }
     </script>
 </body>

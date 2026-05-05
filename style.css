@@ -140,3 +140,19 @@ h3 {
     border-radius: 50%;
     border: 2px solid #2f3136;
 }
+
+/* --- 追加：添付画像のスタイル --- */
+.message-attachments {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.message-attachment {
+    max-width: 100%;
+    max-height: 350px;
+    border-radius: 8px;
+    object-fit: contain; /* アスペクト比を維持して縮小 */
+    align-self: flex-start;
+}

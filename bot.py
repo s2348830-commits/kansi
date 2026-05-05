@@ -40,15 +40,23 @@ async def on_message(message):
     if message.author.bot:
         return
     
-    # コンソール用ログ（前回の機能）
+    # コンソール用ログ
     print(f'[メッセージ] #{message.channel.name} | {message.author}: {message.content}', flush=True)
+    
+    # 添付ファイル（画像）のURLを抽出する
+    attachments = []
+    for attachment in message.attachments:
+        # 画像ファイル（png, jpgなど）のみを対象とする
+        if attachment.content_type and attachment.content_type.startswith('image/'):
+            attachments.append(attachment.url)
     
     # Web画面用データ送信
     send_to_web("message", {
         "channel_id": str(message.channel.id),
         "author": message.author.display_name,
         "avatar": message.author.display_avatar.url if message.author.display_avatar else "",
-        "content": message.content
+        "content": message.content,
+        "attachments": attachments # 追加：画像のURLリスト
     })
 
 @client.event
@@ -60,7 +68,7 @@ async def on_presence_update(before, after):
     new_status = str(after.status)
 
     if old_status != new_status:
-        # コンソール用ログ（前回の機能）
+        # コンソール用ログ
         print(f'[ステータス] {after} が {new_status} になりました。', flush=True)
         # Web画面用データ送信
         send_to_web("presence", {
@@ -73,7 +81,7 @@ async def on_voice_state_update(member, before, after):
     if member.bot:
         return
 
-    # コンソール用ログ（前回の機能）
+    # コンソール用ログ
     old_channel = before.channel
     new_channel = after.channel
     if old_channel is None and new_channel is not None:
