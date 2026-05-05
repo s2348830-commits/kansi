@@ -1,4 +1,14 @@
-/* 全要素のサイズ計算を直感的にする設定（スマホでの横揺れ防止） */
+/* 画像から抽出した最新のDiscordカラー設定 */
+:root {
+    --bg-chat: #313338;       /* チャットエリアの背景色 */
+    --bg-sidebar: #2b2d31;    /* サイドバーの背景色 */
+    --bg-hover: #35373c;      /* ホバー時の背景色 */
+    --text-normal: #dbdee1;   /* 通常の文字色 */
+    --text-muted: #949ba4;    /* チャンネル名などの少し暗い文字色 */
+    --text-header: #f2f3f5;   /* ヘッダーや選択中チャンネルの明るい文字色 */
+    --border-color: #1e1f22;  /* 境界線の色 */
+}
+
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -6,12 +16,12 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #36393f;
-    color: #dcddde;
+    font-family: "gg sans", 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: var(--bg-chat);
+    color: var(--text-normal);
     height: 100vh;
     display: flex;
-    overflow: hidden;
+    overflow: hidden; /* body自体のスクロールは防ぐ */
 }
 
 .container {
@@ -20,8 +30,11 @@ body {
     height: 100%;
 }
 
+/* =========================================
+   サイドバー共通（チャンネル・メンバー）
+========================================= */
 .sidebar {
-    background-color: #2f3136;
+    background-color: var(--bg-sidebar);
     width: 240px;
     display: flex;
     flex-direction: column;
@@ -29,62 +42,83 @@ body {
 }
 
 .channels-sidebar {
-    border-right: 1px solid #202225;
+    border-right: 1px solid var(--border-color);
 }
 
 .members-sidebar {
-    background-color: #2f3136;
+    background-color: var(--bg-sidebar);
     overflow-y: auto;
 }
 
-/* チャンネル一覧が多い時のスクロール設定 */
 .scroll-area {
     flex: 1;
     overflow-y: auto;
 }
 
-h3 {
-    font-size: 12px;
-    text-transform: uppercase;
-    color: #8e9297;
-    margin-bottom: 10px;
+/* 画像に合わせた見出しデザイン */
+#server-name {
+    font-size: 15px;
+    color: var(--text-header);
+    font-weight: bold;
+    padding: 12px 10px;
+    margin: -10px -10px 15px -10px;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    text-transform: none;
 }
 
+h3 {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-muted);
+    margin-top: 10px;
+    margin-bottom: 5px;
+    padding-left: 5px;
+}
+
+/* チャンネル一覧 */
 .channel-item {
-    padding: 8px 10px;
+    padding: 6px 10px;
     margin-bottom: 2px;
     border-radius: 4px;
     cursor: pointer;
-    color: #8e9297;
-    font-weight: bold;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 15px;
 }
 
 .channel-item:hover {
-    background-color: #393c43;
-    color: #dcddde;
+    background-color: var(--bg-hover);
+    color: var(--text-normal);
 }
 
+/* =========================================
+   チャットエリア
+========================================= */
 .chat-area {
     flex: 1;
+    min-width: 300px;
     display: flex;
     flex-direction: column;
-    background-color: #36393f;
+    background-color: var(--bg-chat);
 }
 
 .chat-header {
     height: 48px;
-    border-bottom: 1px solid #202225;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    padding: 0 20px;
-    flex-shrink: 0; /* スマホでヘッダーが潰れないように設定 */
+    padding: 0 15px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .chat-header h3 {
     margin: 0;
-    color: #fff;
+    color: var(--text-header);
     font-size: 16px;
-    text-transform: none;
+    padding-left: 0;
+    font-weight: bold;
 }
 
 .messages {
@@ -103,7 +137,7 @@ h3 {
 
 .message-author {
     font-weight: bold;
-    color: #fff;
+    color: var(--text-header);
     margin-bottom: 4px;
 }
 
@@ -112,16 +146,20 @@ h3 {
     word-break: break-word;
 }
 
+/* =========================================
+   メンバー一覧＆アイコン類
+========================================= */
 .member-item {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 8px 5px;
     border-radius: 4px;
+    cursor: pointer;
 }
 
 .member-item:hover {
-    background-color: #393c43;
+    background-color: var(--bg-hover);
 }
 
 .avatar-container {
@@ -145,9 +183,10 @@ h3 {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 2px solid #2f3136;
+    border: 2px solid var(--bg-sidebar);
 }
 
+/* 添付画像 */
 .message-attachments {
     margin-top: 8px;
     display: flex;
@@ -163,7 +202,7 @@ h3 {
     align-self: flex-start;
 }
 
-/* ボイスチャンネルの参加者用スタイル */
+/* ボイスチャンネルの参加者 */
 .voice-members-list {
     padding-left: 20px;
     margin-bottom: 8px;
@@ -178,13 +217,13 @@ h3 {
     gap: 8px;
     padding: 4px 6px;
     border-radius: 4px;
-    color: #8e9297;
+    color: var(--text-muted);
     font-size: 14px;
 }
 
 .voice-member-item:hover {
-    background-color: #393c43;
-    color: #dcddde;
+    background-color: var(--bg-hover);
+    color: var(--text-normal);
 }
 
 .voice-avatar {
@@ -196,38 +235,47 @@ h3 {
 
 
 /* =========================================
-   スマホ・タブレット用レスポンシブデザイン
-   （画面幅が768px以下の場合に適用）
+   スマホ・タブレット用：アプリ風スワイプレイアウト
 ========================================= */
 @media screen and (max-width: 768px) {
+    /* 縦積みをやめ、横スクロールで3カラムを移動できるようにする */
     .container {
-        /* 横並びから縦積みに変更 */
-        flex-direction: column; 
+        flex-direction: row;
+        overflow-x: auto;
+        /* スワイプ時に各パネルにピタッと止まるようにする */
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefoxスクロールバー非表示 */
+    }
+    
+    .container::-webkit-scrollbar {
+        display: none; /* Chrome/Safariスクロールバー非表示 */
     }
 
     .sidebar {
-        width: 100%; /* サイドバーを画面幅いっぱいに */
-        padding: 10px 15px; /* スマホでタップしやすいように余白を確保 */
-    }
-
-    .channels-sidebar {
-        height: 25vh; /* 画面全体の25%の高さにしてスクロールさせる */
-        border-right: none;
-        border-bottom: 1px solid #202225;
+        width: 280px; /* スマホで操作しやすい太さに */
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        border-right: 1px solid var(--border-color);
+        border-bottom: none;
     }
 
     .chat-area {
-        flex: 1; /* 残りの高さをすべてチャットエリアに割り当て */
-        height: 50vh;
+        width: 100vw; /* スマホ画面ではチャットエリアが全画面幅になる */
+        flex: none;
+        flex-shrink: 0;
+        scroll-snap-align: center; /* 中央にピタッと止まる */
     }
 
     .members-sidebar {
-        height: 25vh; /* 画面全体の25%の高さ */
-        border-top: 1px solid #202225;
+        width: 280px;
+        flex-shrink: 0;
+        scroll-snap-align: end;
+        border-left: 1px solid var(--border-color);
+        border-top: none;
     }
 
-    /* スマホ画面だと画像が大きすぎる場合があるので制限 */
     .message-attachment {
-        max-height: 200px;
+        max-height: 220px;
     }
 }
