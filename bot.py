@@ -69,8 +69,8 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author.bot:
-        return
+    # 修正：Botのメッセージを除外する処理（if message.author.bot: return）を削除しました。
+    # これにより、Bot自身が送信したメッセージや、他のBotのメッセージもWeb画面に表示されるようになります。
     
     print(f'[メッセージ] #{message.channel.name} | {message.author}: {message.content}', flush=True)
     
