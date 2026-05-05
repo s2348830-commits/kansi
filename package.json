@@ -1,0 +1,10 @@
+{
+  "name": "discord-bot-keepalive",
+  "version": "1.0.0",
+  "description": "Discord Bot running on Python with a Node.js keep-alive server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
